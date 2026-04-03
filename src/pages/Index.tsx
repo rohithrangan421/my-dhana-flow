@@ -127,6 +127,9 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Salary Overview */}
+      <SalarySection salary={salary} totalSpent={totals.totalActual} onSalaryChange={handleSalaryChange} />
+
       {/* Summary */}
       <SummaryCards totals={totals} />
 
