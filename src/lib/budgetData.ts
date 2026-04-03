@@ -116,3 +116,12 @@ export function calcTotals(data: MonthData) {
   const totalActual = all.reduce((s, i) => s + i.actual, 0);
   return { totalPlanned, totalActual, remaining: totalPlanned - totalActual };
 }
+
+export function loadSalary(year: number, month: number): number {
+  const raw = localStorage.getItem(`salary_${year}_${month}`);
+  return raw ? Number(raw) : 0;
+}
+
+export function saveSalary(year: number, month: number, amount: number) {
+  localStorage.setItem(`salary_${year}_${month}`, String(amount));
+}
