@@ -58,6 +58,18 @@ const Index = () => {
     toast.success("Updated!", { duration: 1500 });
   };
 
+  const addItem = (section: keyof MonthData, category: string) => {
+    const newData = { ...data, [section]: [...data[section], { category, planned: 0, actual: 0 }] };
+    persist(newData);
+    toast.success(`Added "${category}"`, { duration: 1500 });
+  };
+
+  const removeItem = (section: keyof MonthData, idx: number) => {
+    const newData = { ...data, [section]: data[section].filter((_, i) => i !== idx) };
+    persist(newData);
+    toast.info("Category removed", { duration: 1500 });
+  };
+
   const handleReset = () => {
     resetMonth(year, month);
     const fresh = loadMonth(year, month);
@@ -138,10 +150,10 @@ const Index = () => {
 
       {/* Budget Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <BudgetTable title="📋 Bills" items={data.bills} onUpdate={(i, f, v) => updateSection("bills", i, f, v)} />
-        <BudgetTable title="🛒 Expenses" items={data.expenses} onUpdate={(i, f, v) => updateSection("expenses", i, f, v)} />
-        <BudgetTable title="🏦 Savings" items={data.savings} onUpdate={(i, f, v) => updateSection("savings", i, f, v)} />
-        <BudgetTable title="📈 Investments" items={data.investments} onUpdate={(i, f, v) => updateSection("investments", i, f, v)} />
+        <BudgetTable title="📋 Bills" items={data.bills} onUpdate={(i, f, v) => updateSection("bills", i, f, v)} onAddItem={(c) => addItem("bills", c)} onRemoveItem={(i) => removeItem("bills", i)} />
+        <BudgetTable title="🛒 Expenses" items={data.expenses} onUpdate={(i, f, v) => updateSection("expenses", i, f, v)} onAddItem={(c) => addItem("expenses", c)} onRemoveItem={(i) => removeItem("expenses", i)} />
+        <BudgetTable title="🏦 Savings" items={data.savings} onUpdate={(i, f, v) => updateSection("savings", i, f, v)} onAddItem={(c) => addItem("savings", c)} onRemoveItem={(i) => removeItem("savings", i)} />
+        <BudgetTable title="📈 Investments" items={data.investments} onUpdate={(i, f, v) => updateSection("investments", i, f, v)} onAddItem={(c) => addItem("investments", c)} onRemoveItem={(i) => removeItem("investments", i)} />
       </div>
 
       {/* Savings Goals */}
