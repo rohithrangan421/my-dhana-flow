@@ -2,7 +2,6 @@ import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import {
   type MonthData,
-  type BudgetItem,
   loadMonth,
   saveMonth,
   resetMonth,
@@ -10,11 +9,14 @@ import {
   importData,
   getMonthName,
   calcTotals,
+  loadSalary,
+  saveSalary,
 } from "@/lib/budgetData";
 import BudgetTable from "@/components/BudgetTable";
 import SummaryCards from "@/components/SummaryCards";
 import BudgetCharts from "@/components/BudgetCharts";
 import SavingsGoals from "@/components/SavingsGoals";
+import SalarySection from "@/components/SalarySection";
 import { ChevronLeft, ChevronRight, RotateCcw, Download, Upload } from "lucide-react";
 
 const Index = () => {
