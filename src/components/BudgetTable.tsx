@@ -102,6 +102,13 @@ const BudgetTable = ({ title, items, onUpdate, onAddItem, onRemoveItem }: Props)
                     )}
                   </td>
                   <td className={`py-2.5 text-right font-semibold ${color}`}>{pct}%</td>
+                  {onRemoveItem && (
+                    <td className="py-2.5 text-center">
+                      <button onClick={() => onRemoveItem(idx)} className="text-muted-foreground hover:text-destructive transition-colors">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -114,10 +121,57 @@ const BudgetTable = ({ title, items, onUpdate, onAddItem, onRemoveItem }: Props)
               <td className={`py-2.5 text-right ${getColor(totalPlanned, totalActual)}`}>
                 {totalPlanned > 0 ? Math.round((totalActual / totalPlanned) * 100) : 0}%
               </td>
+              {onRemoveItem && <td></td>}
             </tr>
           </tfoot>
         </table>
       </div>
+      {onAddItem && (
+        <div className="mt-3">
+          {adding ? (
+            <div className="flex gap-2 items-center">
+              <input
+                type="text"
+                placeholder="Category name"
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && newCategory.trim()) {
+                    onAddItem(newCategory.trim());
+                    setNewCategory("");
+                    setAdding(false);
+                  }
+                  if (e.key === "Escape") setAdding(false);
+                }}
+                className="flex-1 bg-muted text-foreground rounded px-3 py-1.5 border border-border text-sm outline-none focus:border-primary/50"
+                autoFocus
+              />
+              <button
+                onClick={() => {
+                  if (newCategory.trim()) {
+                    onAddItem(newCategory.trim());
+                    setNewCategory("");
+                    setAdding(false);
+                  }
+                }}
+                className="px-3 py-1.5 bg-primary text-primary-foreground rounded text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                Add
+              </button>
+              <button onClick={() => setAdding(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setAdding(true)}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Add Category
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
