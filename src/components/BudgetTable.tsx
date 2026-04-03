@@ -51,6 +51,7 @@ const BudgetTable = ({ title, items, onUpdate, onAddItem, onRemoveItem }: Props)
               <th className="text-right py-2 font-medium">Planned</th>
               <th className="text-right py-2 font-medium">Actual</th>
               <th className="text-right py-2 font-medium">%</th>
+              {onRemoveItem && <th className="w-8"></th>}
             </tr>
           </thead>
           <tbody>
