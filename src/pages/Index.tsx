@@ -24,6 +24,7 @@ const Index = () => {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
   const [data, setData] = useState<MonthData>(() => loadMonth(year, month));
+  const [salary, setSalary] = useState(() => loadSalary(year, month));
   const fileRef = useRef<HTMLInputElement>(null);
 
   const persist = useCallback(
