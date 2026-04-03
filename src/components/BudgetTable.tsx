@@ -18,8 +18,11 @@ function getColor(planned: number, actual: number) {
   return "text-destructive";
 }
 
-const BudgetTable = ({ title, items, onUpdate }: Props) => {
+const BudgetTable = ({ title, items, onUpdate, onAddItem, onRemoveItem }: Props) => {
   const [editingCell, setEditingCell] = useState<{ idx: number; field: "planned" | "actual" } | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [adding, setAdding] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
   const [editValue, setEditValue] = useState("");
 
   const startEdit = (idx: number, field: "planned" | "actual", current: number) => {
