@@ -1,16 +1,140 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback, useRef } from "react";
+import { toast } from "sonner";
+import {
+  type MonthData,
+  type BudgetItem,
+  loadMonth,
+  saveMonth,
+  resetMonth,
+  exportAllData,
+  importData,
+  getMonthName,
+  calcTotals,
+} from "@/lib/budgetData";
+import BudgetTable from "@/components/BudgetTable";
+import SummaryCards from "@/components/SummaryCards";
+import BudgetCharts from "@/components/BudgetCharts";
+import SavingsGoals from "@/components/SavingsGoals";
+import { ChevronLeft, ChevronRight, RotateCcw, Download, Upload } from "lucide-react";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const now = new Date();
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth());
+  const [data, setData] = useState<MonthData>(() => loadMonth(year, month));
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const persist = useCallback(
+    (newData: MonthData) => {
+      setData(newData);
+      saveMonth(year, month, newData);
+    },
+    [year, month]
+  );
+
+  const navigate = (dir: -1 | 1) => {
+    let m = month + dir;
+    let y = year;
+    if (m < 0) { m = 11; y--; }
+    if (m > 11) { m = 0; y++; }
+    setMonth(m);
+    setYear(y);
+    setData(loadMonth(y, m));
+  };
+
+  const updateSection = (section: keyof MonthData, idx: number, field: "planned" | "actual", value: number) => {
+    const newData = { ...data, [section]: data[section].map((item, i) => (i === idx ? { ...item, [field]: value } : item)) };
+    persist(newData);
+    toast.success("Updated!", { duration: 1500 });
+  };
+
+  const handleReset = () => {
+    resetMonth(year, month);
+    const fresh = loadMonth(year, month);
+    setData(fresh);
+    toast.info("Month data reset");
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([exportAllData()], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "budget_data.json";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Data exported!");
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        importData(reader.result as string);
+        setData(loadMonth(year, month));
+        toast.success("Data imported!");
+      } catch {
+        toast.error("Invalid JSON file");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const totals = calcTotals(data);
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background p-4 md:p-8 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+          💰 <span className="text-primary">BudgetBuddy</span>
+        </h1>
+        <div className="flex items-center gap-2">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-lg bg-secondary hover:bg-muted transition-colors">
+            <ChevronLeft className="w-5 h-5 text-foreground" />
+          </button>
+          <span className="text-lg font-semibold text-foreground min-w-[160px] text-center">
+            {getMonthName(month)} {year}
+          </span>
+          <button onClick={() => navigate(1)} className="p-2 rounded-lg bg-secondary hover:bg-muted transition-colors">
+            <ChevronRight className="w-5 h-5 text-foreground" />
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={handleReset} className="p-2 rounded-lg bg-secondary hover:bg-destructive/20 transition-colors" title="Reset">
+            <RotateCcw className="w-4 h-4 text-foreground" />
+          </button>
+          <button onClick={handleExport} className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors" title="Export">
+            <Download className="w-4 h-4 text-foreground" />
+          </button>
+          <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors" title="Import">
+            <Upload className="w-4 h-4 text-foreground" />
+          </button>
+          <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+        </div>
+      </div>
+
+      {/* Summary */}
+      <SummaryCards totals={totals} />
+
+      {/* Charts */}
+      <BudgetCharts data={data} totals={totals} />
+
+      {/* Budget Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <BudgetTable title="📋 Bills" items={data.bills} onUpdate={(i, f, v) => updateSection("bills", i, f, v)} />
+        <BudgetTable title="🛒 Expenses" items={data.expenses} onUpdate={(i, f, v) => updateSection("expenses", i, f, v)} />
+        <BudgetTable title="🏦 Savings" items={data.savings} onUpdate={(i, f, v) => updateSection("savings", i, f, v)} />
+        <BudgetTable title="📈 Investments" items={data.investments} onUpdate={(i, f, v) => updateSection("investments", i, f, v)} />
+      </div>
+
+      {/* Savings Goals */}
+      <SavingsGoals savings={data.savings} />
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
