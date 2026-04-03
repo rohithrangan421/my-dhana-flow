@@ -43,6 +43,13 @@ const Index = () => {
     setMonth(m);
     setYear(y);
     setData(loadMonth(y, m));
+    setSalary(loadSalary(y, m));
+  };
+
+  const handleSalaryChange = (val: number) => {
+    setSalary(val);
+    saveSalary(year, month, val);
+    toast.success("Salary updated!", { duration: 1500 });
   };
 
   const updateSection = (section: keyof MonthData, idx: number, field: "planned" | "actual", value: number) => {
