@@ -2,7 +2,6 @@ import { useState, useCallback, useRef } from "react";
 import { toast } from "sonner";
 import {
   type MonthData,
-  type BudgetItem,
   loadMonth,
   saveMonth,
   resetMonth,
@@ -10,11 +9,14 @@ import {
   importData,
   getMonthName,
   calcTotals,
+  loadSalary,
+  saveSalary,
 } from "@/lib/budgetData";
 import BudgetTable from "@/components/BudgetTable";
 import SummaryCards from "@/components/SummaryCards";
 import BudgetCharts from "@/components/BudgetCharts";
 import SavingsGoals from "@/components/SavingsGoals";
+import SalarySection from "@/components/SalarySection";
 import { ChevronLeft, ChevronRight, RotateCcw, Download, Upload } from "lucide-react";
 
 const Index = () => {
@@ -22,6 +24,7 @@ const Index = () => {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
   const [data, setData] = useState<MonthData>(() => loadMonth(year, month));
+  const [salary, setSalary] = useState(() => loadSalary(year, month));
   const fileRef = useRef<HTMLInputElement>(null);
 
   const persist = useCallback(
@@ -40,6 +43,13 @@ const Index = () => {
     setMonth(m);
     setYear(y);
     setData(loadMonth(y, m));
+    setSalary(loadSalary(y, m));
+  };
+
+  const handleSalaryChange = (val: number) => {
+    setSalary(val);
+    saveSalary(year, month, val);
+    toast.success("Salary updated!", { duration: 1500 });
   };
 
   const updateSection = (section: keyof MonthData, idx: number, field: "planned" | "actual", value: number) => {
@@ -116,6 +126,9 @@ const Index = () => {
           <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
         </div>
       </div>
+
+      {/* Salary Overview */}
+      <SalarySection salary={salary} totalSpent={totals.totalActual} onSalaryChange={handleSalaryChange} />
 
       {/* Summary */}
       <SummaryCards totals={totals} />

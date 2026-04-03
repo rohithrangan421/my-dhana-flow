@@ -38,8 +38,6 @@ export const DEFAULT_EXPENSES: BudgetItem[] = [
 export const DEFAULT_SAVINGS: BudgetItem[] = [
   { category: "Emergency Fund", planned: 5000, actual: 0 },
   { category: "Travel Fund", planned: 3000, actual: 0 },
-  { category: "Home Down Payment", planned: 10000, actual: 0 },
-  { category: "Wedding Fund", planned: 5000, actual: 0 },
 ];
 
 export const DEFAULT_INVESTMENTS: BudgetItem[] = [
@@ -117,4 +115,13 @@ export function calcTotals(data: MonthData) {
   const totalPlanned = all.reduce((s, i) => s + i.planned, 0);
   const totalActual = all.reduce((s, i) => s + i.actual, 0);
   return { totalPlanned, totalActual, remaining: totalPlanned - totalActual };
+}
+
+export function loadSalary(year: number, month: number): number {
+  const raw = localStorage.getItem(`salary_${year}_${month}`);
+  return raw ? Number(raw) : 0;
+}
+
+export function saveSalary(year: number, month: number, amount: number) {
+  localStorage.setItem(`salary_${year}_${month}`, String(amount));
 }
