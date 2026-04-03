@@ -38,8 +38,6 @@ export const DEFAULT_EXPENSES: BudgetItem[] = [
 export const DEFAULT_SAVINGS: BudgetItem[] = [
   { category: "Emergency Fund", planned: 5000, actual: 0 },
   { category: "Travel Fund", planned: 3000, actual: 0 },
-  { category: "Home Down Payment", planned: 10000, actual: 0 },
-  { category: "Wedding Fund", planned: 5000, actual: 0 },
 ];
 
 export const DEFAULT_INVESTMENTS: BudgetItem[] = [
