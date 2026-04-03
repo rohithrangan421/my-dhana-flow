@@ -1,10 +1,13 @@
 import type { BudgetItem } from "@/lib/budgetData";
 import { useState } from "react";
+import { Plus, X } from "lucide-react";
 
 interface Props {
   title: string;
   items: BudgetItem[];
   onUpdate: (index: number, field: "planned" | "actual", value: number) => void;
+  onAddItem?: (category: string) => void;
+  onRemoveItem?: (index: number) => void;
 }
 
 function getColor(planned: number, actual: number) {
