@@ -23,7 +23,6 @@ const BudgetTable = ({ title, items, onUpdate, onAddItem, onRemoveItem }: Props)
   const [editValue, setEditValue] = useState("");
   const [adding, setAdding] = useState(false);
   const [newCategory, setNewCategory] = useState("");
-  const [editValue, setEditValue] = useState("");
 
   const startEdit = (idx: number, field: "planned" | "actual", current: number) => {
     setEditingCell({ idx, field });
