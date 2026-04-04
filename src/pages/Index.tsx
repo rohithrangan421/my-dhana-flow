@@ -18,6 +18,7 @@ import BudgetCharts from "@/components/BudgetCharts";
 import SavingsGoals from "@/components/SavingsGoals";
 import SalarySection from "@/components/SalarySection";
 import { ChevronLeft, ChevronRight, RotateCcw, Download, Upload } from "lucide-react";
+import * as XLSX from "xlsx";
 
 const Index = () => {
   const now = new Date();
@@ -71,21 +72,51 @@ const Index = () => {
   };
 
   const handleReset = () => {
-    resetMonth(year, month);
-    const fresh = loadMonth(year, month);
-    setData(fresh);
-    toast.info("Month data reset");
+    const zeroed = resetMonth(year, month);
+    setData(zeroed);
+    setSalary(0);
+    saveSalary(year, month, 0);
+    toast.info("All amounts reset to zero");
   };
 
   const handleExport = () => {
-    const blob = new Blob([exportAllData()], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "budget_data.json";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Data exported!");
+    const wb = XLSX.utils.book_new();
+    const sections: { name: string; items: typeof data.bills }[] = [
+      { name: "Bills", items: data.bills },
+      { name: "Expenses", items: data.expenses },
+      { name: "Savings", items: data.savings },
+      { name: "Investments", items: data.investments },
+    ];
+
+    // Summary sheet
+    const summaryRows = [
+      ["BudgetBuddy - " + getMonthName(month) + " " + year],
+      [],
+      ["Salary", salary],
+      ["Total Planned", totals.totalPlanned],
+      ["Total Actual", totals.totalActual],
+      ["Remaining", totals.remaining],
+    ];
+    const summaryWs = XLSX.utils.aoa_to_sheet(summaryRows);
+    XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
+
+    // Section sheets
+    for (const sec of sections) {
+      const rows = [["Category", "Planned (₹)", "Actual (₹)", "Difference (₹)"]];
+      let totalP = 0, totalA = 0;
+      for (const item of sec.items) {
+        rows.push([item.category, item.planned as any, item.actual as any, (item.planned - item.actual) as any]);
+        totalP += item.planned;
+        totalA += item.actual;
+      }
+      rows.push(["Total", totalP as any, totalA as any, (totalP - totalA) as any]);
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws["!cols"] = [{ wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, ws, sec.name);
+    }
+
+    XLSX.writeFile(wb, `BudgetBuddy_${getMonthName(month)}_${year}.xlsx`);
+    toast.success("Exported to Excel!");
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
