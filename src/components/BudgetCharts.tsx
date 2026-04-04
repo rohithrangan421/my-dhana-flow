@@ -70,21 +70,34 @@ const BudgetCharts = ({ data, totals }: Props) => {
     ],
   };
 
+  const barColors = [
+    "hsl(252,85%,63%)",
+    "hsl(190,90%,50%)",
+    "hsl(155,75%,48%)",
+    "hsl(40,95%,58%)",
+  ];
+  const barColorsHover = [
+    "hsl(252,85%,70%)",
+    "hsl(190,90%,58%)",
+    "hsl(155,75%,55%)",
+    "hsl(40,95%,65%)",
+  ];
+
   const barData = {
     labels: sections.map((s) => s.label),
     datasets: [
       {
         label: "Planned",
         data: sections.map((s) => s.items.reduce((sum, i) => sum + i.planned, 0)),
-        backgroundColor: "hsl(230,16%,22%)",
-        hoverBackgroundColor: "hsl(230,16%,28%)",
+        backgroundColor: barColors.map((c) => c.replace(/\d+%\)$/, "30%)")),
+        hoverBackgroundColor: barColors.map((c) => c.replace(/\d+%\)$/, "40%)")),
         borderRadius: 8,
       },
       {
         label: "Actual",
         data: sections.map((s) => s.items.reduce((sum, i) => sum + i.actual, 0)),
-        backgroundColor: "hsl(252,85%,63%)",
-        hoverBackgroundColor: "hsl(252,85%,70%)",
+        backgroundColor: barColors,
+        hoverBackgroundColor: barColorsHover,
         borderRadius: 8,
       },
     ],
