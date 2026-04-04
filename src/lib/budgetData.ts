@@ -79,7 +79,16 @@ export function saveMonth(year: number, month: number, data: MonthData) {
 }
 
 export function resetMonth(year: number, month: number) {
-  localStorage.removeItem(getKey(year, month));
+  const current = loadMonth(year, month);
+  const zeroOut = (items: BudgetItem[]) => items.map(i => ({ ...i, planned: 0, actual: 0 }));
+  const zeroed: MonthData = {
+    bills: zeroOut(current.bills),
+    expenses: zeroOut(current.expenses),
+    savings: zeroOut(current.savings),
+    investments: zeroOut(current.investments),
+  };
+  saveMonth(year, month, zeroed);
+  return zeroed;
 }
 
 export function exportAllData(): string {

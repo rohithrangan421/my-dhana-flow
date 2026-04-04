@@ -18,6 +18,7 @@ import BudgetCharts from "@/components/BudgetCharts";
 import SavingsGoals from "@/components/SavingsGoals";
 import SalarySection from "@/components/SalarySection";
 import { ChevronLeft, ChevronRight, RotateCcw, Download, Upload } from "lucide-react";
+import * as XLSX from "xlsx";
 
 const Index = () => {
   const now = new Date();
