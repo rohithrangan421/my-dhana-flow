@@ -93,8 +93,14 @@ const BudgetCharts = ({ data, totals }: Props) => {
   const barOptions = {
     ...chartOptions,
     scales: {
-      x: { ticks: { color: "hsl(225,12%,50%)" }, grid: { display: false } },
-      y: { ticks: { color: "hsl(225,12%,50%)" }, grid: { color: "hsl(230,16%,16%)" } },
+      x: {
+        ticks: { color: "hsl(225,12%,50%)", font: { size: 10 }, maxRotation: 0, minRotation: 0 },
+        grid: { display: false },
+      },
+      y: {
+        ticks: { color: "hsl(225,12%,50%)", font: { size: 10 }, callback: (v: number) => v >= 1000 ? `${v / 1000}k` : v },
+        grid: { color: "hsl(230,16%,16%)" },
+      },
     },
   };
 
