@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Wallet, TrendingDown, PiggyBank } from "lucide-react";
 
 interface Props {
   salary: number;
@@ -21,11 +22,13 @@ const SalarySection = ({ salary, totalSpent, onSalaryChange }: Props) => {
   };
 
   return (
-    <div className="bg-card rounded-xl p-5 shadow-lg border border-border mb-8">
-      <h3 className="text-lg font-semibold text-foreground mb-4">💼 Salary Overview</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <p className="text-muted-foreground text-sm mb-1">Monthly Salary</p>
+    <div className="bg-gradient-to-r from-primary/10 via-card to-accent/10 rounded-2xl p-6 shadow-xl border border-primary/20 mb-8 animate-fade-in">
+      <h3 className="text-lg font-bold text-foreground mb-5 flex items-center gap-2">
+        <Wallet className="w-5 h-5 text-primary" /> Salary Overview
+      </h3>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <div className="bg-secondary/50 rounded-xl p-4">
+          <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-1">Monthly Salary</p>
           {editing ? (
             <input
               type="number"
@@ -33,7 +36,7 @@ const SalarySection = ({ salary, totalSpent, onSalaryChange }: Props) => {
               onChange={(e) => setValue(e.target.value)}
               onBlur={commit}
               onKeyDown={(e) => e.key === "Enter" && commit()}
-              className="w-full bg-muted text-foreground text-xl font-bold rounded px-3 py-1 border border-primary/50 outline-none"
+              className="w-full bg-muted text-foreground text-xl font-bold rounded-lg px-3 py-1.5 border border-primary/50 outline-none focus:ring-2 focus:ring-primary/30"
               autoFocus
             />
           ) : (
@@ -45,26 +48,36 @@ const SalarySection = ({ salary, totalSpent, onSalaryChange }: Props) => {
             </p>
           )}
         </div>
-        <div>
-          <p className="text-muted-foreground text-sm mb-1">Total Spent</p>
-          <p className="text-2xl font-bold text-foreground">{fmt(totalSpent)}</p>
+        <div className="bg-secondary/50 rounded-xl p-4">
+          <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
+            <TrendingDown className="w-3.5 h-3.5" /> Total Spent
+          </p>
+          <p className="text-2xl font-bold text-accent">{fmt(totalSpent)}</p>
         </div>
-        <div>
-          <p className="text-muted-foreground text-sm mb-1">Net Remaining</p>
+        <div className="bg-secondary/50 rounded-xl p-4">
+          <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider mb-1 flex items-center gap-1">
+            <PiggyBank className="w-3.5 h-3.5" /> Net Remaining
+          </p>
           <p className={`text-2xl font-bold ${remaining >= 0 ? "text-success" : "text-destructive"}`}>
             {remaining >= 0 ? fmt(remaining) : `-${fmt(Math.abs(remaining))}`}
           </p>
         </div>
       </div>
       {salary > 0 && (
-        <div className="mt-4">
-          <div className="flex justify-between text-sm text-muted-foreground mb-1">
-            <span>Spending</span>
-            <span>{pct}% of salary</span>
+        <div className="mt-5">
+          <div className="flex justify-between text-sm text-muted-foreground mb-1.5 font-medium">
+            <span>Spending Utilization</span>
+            <span className={pct > 100 ? "text-destructive" : pct > 80 ? "text-warning" : "text-success"}>{pct}%</span>
           </div>
-          <div className="w-full bg-muted rounded-full h-3">
+          <div className="w-full bg-muted rounded-full h-3.5 overflow-hidden">
             <div
-              className={`h-3 rounded-full transition-all duration-500 ${pct > 100 ? "bg-destructive" : pct > 80 ? "bg-warning" : "bg-primary"}`}
+              className={`h-3.5 rounded-full transition-all duration-700 ${
+                pct > 100
+                  ? "bg-gradient-to-r from-destructive to-destructive/70"
+                  : pct > 80
+                  ? "bg-gradient-to-r from-warning to-warning/70"
+                  : "bg-gradient-to-r from-success to-accent"
+              }`}
               style={{ width: `${Math.min(pct, 100)}%` }}
             />
           </div>
