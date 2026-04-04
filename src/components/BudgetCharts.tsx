@@ -21,7 +21,7 @@ const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { labels: { color: "hsl(210,20%,85%)", font: { size: 11 } } },
+    legend: { labels: { color: "hsl(220,20%,80%)", font: { size: 11, weight: 500 as const } } },
   },
 };
 
@@ -33,9 +33,10 @@ const BudgetCharts = ({ data, totals }: Props) => {
     datasets: [
       {
         data: [totalActual, Math.max(0, remaining)],
-        backgroundColor: ["hsl(168,70%,45%)", "hsl(220,14%,20%)"],
+        backgroundColor: ["hsl(252,85%,63%)", "hsl(230,16%,20%)"],
+        hoverBackgroundColor: ["hsl(252,85%,70%)", "hsl(230,16%,25%)"],
         borderWidth: 0,
-        cutout: "70%",
+        cutout: "72%",
       },
     ],
   };
@@ -53,10 +54,16 @@ const BudgetCharts = ({ data, totals }: Props) => {
       {
         data: sections.map((s) => s.items.reduce((sum, i) => sum + i.actual, 0)),
         backgroundColor: [
-          "hsl(168,70%,45%)",
-          "hsl(200,70%,50%)",
-          "hsl(142,60%,45%)",
-          "hsl(45,90%,55%)",
+          "hsl(252,85%,63%)",
+          "hsl(190,90%,50%)",
+          "hsl(155,75%,48%)",
+          "hsl(40,95%,58%)",
+        ],
+        hoverBackgroundColor: [
+          "hsl(252,85%,70%)",
+          "hsl(190,90%,58%)",
+          "hsl(155,75%,55%)",
+          "hsl(40,95%,65%)",
         ],
         borderWidth: 0,
       },
@@ -69,14 +76,16 @@ const BudgetCharts = ({ data, totals }: Props) => {
       {
         label: "Planned",
         data: sections.map((s) => s.items.reduce((sum, i) => sum + i.planned, 0)),
-        backgroundColor: "hsl(220,14%,25%)",
-        borderRadius: 6,
+        backgroundColor: "hsl(230,16%,22%)",
+        hoverBackgroundColor: "hsl(230,16%,28%)",
+        borderRadius: 8,
       },
       {
         label: "Actual",
         data: sections.map((s) => s.items.reduce((sum, i) => sum + i.actual, 0)),
-        backgroundColor: "hsl(168,70%,45%)",
-        borderRadius: 6,
+        backgroundColor: "hsl(252,85%,63%)",
+        hoverBackgroundColor: "hsl(252,85%,70%)",
+        borderRadius: 8,
       },
     ],
   };
@@ -84,27 +93,27 @@ const BudgetCharts = ({ data, totals }: Props) => {
   const barOptions = {
     ...chartOptions,
     scales: {
-      x: { ticks: { color: "hsl(210,20%,55%)" }, grid: { display: false } },
-      y: { ticks: { color: "hsl(210,20%,55%)" }, grid: { color: "hsl(220,14%,18%)" } },
+      x: { ticks: { color: "hsl(225,12%,50%)" }, grid: { display: false } },
+      y: { ticks: { color: "hsl(225,12%,50%)" }, grid: { color: "hsl(230,16%,16%)" } },
     },
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div className="bg-card rounded-xl p-5 shadow-lg border border-border">
-        <h3 className="text-sm font-semibold text-muted-foreground mb-3">Spent vs Remaining</h3>
+      <div className="bg-gradient-to-br from-primary/10 to-card rounded-2xl p-5 shadow-xl border border-primary/15 animate-fade-in">
+        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Spent vs Remaining</h3>
         <div className="h-48 flex items-center justify-center">
           <Doughnut data={donutData} options={chartOptions} />
         </div>
       </div>
-      <div className="bg-card rounded-xl p-5 shadow-lg border border-border">
-        <h3 className="text-sm font-semibold text-muted-foreground mb-3">Allocation</h3>
+      <div className="bg-gradient-to-br from-accent/10 to-card rounded-2xl p-5 shadow-xl border border-accent/15 animate-fade-in">
+        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Allocation</h3>
         <div className="h-48 flex items-center justify-center">
           <Pie data={pieData} options={chartOptions} />
         </div>
       </div>
-      <div className="bg-card rounded-xl p-5 shadow-lg border border-border">
-        <h3 className="text-sm font-semibold text-muted-foreground mb-3">Cash Flow</h3>
+      <div className="bg-gradient-to-br from-success/10 to-card rounded-2xl p-5 shadow-xl border border-success/15 animate-fade-in">
+        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">Cash Flow</h3>
         <div className="h-48">
           <Bar data={barData} options={barOptions} />
         </div>

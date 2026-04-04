@@ -107,56 +107,56 @@ const Index = () => {
 
   const totals = calcTotals(data);
 
+  const sectionColors = {
+    bills: "from-primary/20 to-primary/5 border-primary/30",
+    expenses: "from-accent/20 to-accent/5 border-accent/30",
+    savings: "from-success/20 to-success/5 border-success/30",
+    investments: "from-warning/20 to-warning/5 border-warning/30",
+  };
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-          💰 <span className="text-primary">BudgetBuddy</span>
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4 animate-fade-in">
+        <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
+          💰 <span className="bg-gradient-to-r from-primary via-accent to-success bg-clip-text text-transparent">BudgetBuddy</span>
         </h1>
-        <div className="flex items-center gap-2">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-lg bg-secondary hover:bg-muted transition-colors">
-            <ChevronLeft className="w-5 h-5 text-foreground" />
+        <div className="flex items-center gap-1.5">
+          <button onClick={() => navigate(-1)} className="p-2.5 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-200">
+            <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="text-lg font-semibold text-foreground min-w-[160px] text-center">
+          <span className="text-lg font-bold text-foreground min-w-[170px] text-center px-3 py-1.5 rounded-xl bg-secondary/50">
             {getMonthName(month)} {year}
           </span>
-          <button onClick={() => navigate(1)} className="p-2 rounded-lg bg-secondary hover:bg-muted transition-colors">
-            <ChevronRight className="w-5 h-5 text-foreground" />
+          <button onClick={() => navigate(1)} className="p-2.5 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-200">
+            <ChevronRight className="w-5 h-5" />
           </button>
         </div>
         <div className="flex gap-2">
-          <button onClick={handleReset} className="p-2 rounded-lg bg-secondary hover:bg-destructive/20 transition-colors" title="Reset">
-            <RotateCcw className="w-4 h-4 text-foreground" />
+          <button onClick={handleReset} className="p-2.5 rounded-xl bg-secondary hover:bg-destructive/20 hover:text-destructive transition-all duration-200" title="Reset">
+            <RotateCcw className="w-4 h-4" />
           </button>
-          <button onClick={handleExport} className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors" title="Export">
-            <Download className="w-4 h-4 text-foreground" />
+          <button onClick={handleExport} className="p-2.5 rounded-xl bg-secondary hover:bg-primary/20 hover:text-primary transition-all duration-200" title="Export">
+            <Download className="w-4 h-4" />
           </button>
-          <button onClick={() => fileRef.current?.click()} className="p-2 rounded-lg bg-secondary hover:bg-primary/20 transition-colors" title="Import">
-            <Upload className="w-4 h-4 text-foreground" />
+          <button onClick={() => fileRef.current?.click()} className="p-2.5 rounded-xl bg-secondary hover:bg-accent/20 hover:text-accent transition-all duration-200" title="Import">
+            <Upload className="w-4 h-4" />
           </button>
           <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
         </div>
       </div>
 
-      {/* Salary Overview */}
       <SalarySection salary={salary} totalSpent={totals.totalActual} onSalaryChange={handleSalaryChange} />
-
-      {/* Summary */}
       <SummaryCards totals={totals} />
-
-      {/* Charts */}
       <BudgetCharts data={data} totals={totals} />
 
-      {/* Budget Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <BudgetTable title="📋 Bills" items={data.bills} onUpdate={(i, f, v) => updateSection("bills", i, f, v)} onAddItem={(c) => addItem("bills", c)} onRemoveItem={(i) => removeItem("bills", i)} />
-        <BudgetTable title="🛒 Expenses" items={data.expenses} onUpdate={(i, f, v) => updateSection("expenses", i, f, v)} onAddItem={(c) => addItem("expenses", c)} onRemoveItem={(i) => removeItem("expenses", i)} />
-        <BudgetTable title="🏦 Savings" items={data.savings} onUpdate={(i, f, v) => updateSection("savings", i, f, v)} onAddItem={(c) => addItem("savings", c)} onRemoveItem={(i) => removeItem("savings", i)} />
-        <BudgetTable title="📈 Investments" items={data.investments} onUpdate={(i, f, v) => updateSection("investments", i, f, v)} onAddItem={(c) => addItem("investments", c)} onRemoveItem={(i) => removeItem("investments", i)} />
+        <BudgetTable title="📋 Bills" colorClass={sectionColors.bills} items={data.bills} onUpdate={(i, f, v) => updateSection("bills", i, f, v)} onAddItem={(c) => addItem("bills", c)} onRemoveItem={(i) => removeItem("bills", i)} />
+        <BudgetTable title="🛒 Expenses" colorClass={sectionColors.expenses} items={data.expenses} onUpdate={(i, f, v) => updateSection("expenses", i, f, v)} onAddItem={(c) => addItem("expenses", c)} onRemoveItem={(i) => removeItem("expenses", i)} />
+        <BudgetTable title="🏦 Savings" colorClass={sectionColors.savings} items={data.savings} onUpdate={(i, f, v) => updateSection("savings", i, f, v)} onAddItem={(c) => addItem("savings", c)} onRemoveItem={(i) => removeItem("savings", i)} />
+        <BudgetTable title="📈 Investments" colorClass={sectionColors.investments} items={data.investments} onUpdate={(i, f, v) => updateSection("investments", i, f, v)} onAddItem={(c) => addItem("investments", c)} onRemoveItem={(i) => removeItem("investments", i)} />
       </div>
 
-      {/* Savings Goals */}
       <SavingsGoals savings={data.savings} />
     </div>
   );
