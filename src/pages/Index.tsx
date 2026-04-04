@@ -72,10 +72,11 @@ const Index = () => {
   };
 
   const handleReset = () => {
-    resetMonth(year, month);
-    const fresh = loadMonth(year, month);
-    setData(fresh);
-    toast.info("Month data reset");
+    const zeroed = resetMonth(year, month);
+    setData(zeroed);
+    setSalary(0);
+    saveSalary(year, month, 0);
+    toast.info("All amounts reset to zero");
   };
 
   const handleExport = () => {
