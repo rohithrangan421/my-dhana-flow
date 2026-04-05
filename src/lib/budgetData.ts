@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface BudgetItem {
   category: string;
   planned: number;
@@ -48,10 +50,6 @@ export const DEFAULT_INVESTMENTS: BudgetItem[] = [
   { category: "Gold/SGB", planned: 2000, actual: 0 },
 ];
 
-function getKey(year: number, month: number) {
-  return `budget_${year}_${month}`;
-}
-
 export function getDefaultData(): MonthData {
   return {
     bills: DEFAULT_BILLS.map((i) => ({ ...i })),
@@ -61,25 +59,36 @@ export function getDefaultData(): MonthData {
   };
 }
 
-export function loadMonth(year: number, month: number): MonthData {
-  const key = getKey(year, month);
-  const raw = localStorage.getItem(key);
-  if (raw) {
-    try {
-      return JSON.parse(raw);
-    } catch {
-      // fall through
-    }
-  }
-  return getDefaultData();
+export async function loadMonth(year: number, month: number): Promise<MonthData> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return getDefaultData();
+
+  const { data, error } = await supabase
+    .from("budget_data")
+    .select("data")
+    .eq("user_id", user.id)
+    .eq("year", year)
+    .eq("month", month)
+    .maybeSingle();
+
+  if (error || !data) return getDefaultData();
+  return data.data as unknown as MonthData;
 }
 
-export function saveMonth(year: number, month: number, data: MonthData) {
-  localStorage.setItem(getKey(year, month), JSON.stringify(data));
+export async function saveMonth(year: number, month: number, monthData: MonthData) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("budget_data")
+    .upsert(
+      { user_id: user.id, year, month, data: monthData as any },
+      { onConflict: "user_id,year,month" }
+    );
 }
 
-export function resetMonth(year: number, month: number) {
-  const current = loadMonth(year, month);
+export async function resetMonth(year: number, month: number): Promise<MonthData> {
+  const current = await loadMonth(year, month);
   const zeroOut = (items: BudgetItem[]) => items.map(i => ({ ...i, planned: 0, actual: 0 }));
   const zeroed: MonthData = {
     bills: zeroOut(current.bills),
@@ -87,30 +96,42 @@ export function resetMonth(year: number, month: number) {
     savings: zeroOut(current.savings),
     investments: zeroOut(current.investments),
   };
-  saveMonth(year, month, zeroed);
+  await saveMonth(year, month, zeroed);
   return zeroed;
 }
 
-export function exportAllData(): string {
-  const allData: Record<string, MonthData> = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key?.startsWith("budget_")) {
-      try {
-        allData[key] = JSON.parse(localStorage.getItem(key)!);
-      } catch {
-        // skip
-      }
-    }
+export async function exportAllData(): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return "{}";
+
+  const { data } = await supabase
+    .from("budget_data")
+    .select("year, month, data")
+    .eq("user_id", user.id);
+
+  const result: Record<string, any> = {};
+  for (const row of data || []) {
+    result[`budget_${row.year}_${row.month}`] = row.data;
   }
-  return JSON.stringify(allData, null, 2);
+  return JSON.stringify(result, null, 2);
 }
 
-export function importData(json: string) {
-  const data = JSON.parse(json) as Record<string, MonthData>;
-  for (const [key, value] of Object.entries(data)) {
-    if (key.startsWith("budget_")) {
-      localStorage.setItem(key, JSON.stringify(value));
+export async function importData(json: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const parsed = JSON.parse(json) as Record<string, MonthData>;
+  for (const [key, value] of Object.entries(parsed)) {
+    const match = key.match(/^budget_(\d+)_(\d+)$/);
+    if (match) {
+      const year = parseInt(match[1]);
+      const month = parseInt(match[2]);
+      await supabase
+        .from("budget_data")
+        .upsert(
+          { user_id: user.id, year, month, data: value as any },
+          { onConflict: "user_id,year,month" }
+        );
     }
   }
 }
@@ -126,11 +147,30 @@ export function calcTotals(data: MonthData) {
   return { totalPlanned, totalActual, remaining: totalPlanned - totalActual };
 }
 
-export function loadSalary(year: number, month: number): number {
-  const raw = localStorage.getItem(`salary_${year}_${month}`);
-  return raw ? Number(raw) : 0;
+export async function loadSalary(year: number, month: number): Promise<number> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  const { data, error } = await supabase
+    .from("salaries")
+    .select("amount")
+    .eq("user_id", user.id)
+    .eq("year", year)
+    .eq("month", month)
+    .maybeSingle();
+
+  if (error || !data) return 0;
+  return Number(data.amount);
 }
 
-export function saveSalary(year: number, month: number, amount: number) {
-  localStorage.setItem(`salary_${year}_${month}`, String(amount));
+export async function saveSalary(year: number, month: number, amount: number) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase
+    .from("salaries")
+    .upsert(
+      { user_id: user.id, year, month, amount },
+      { onConflict: "user_id,year,month" }
+    );
 }
