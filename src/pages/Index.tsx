@@ -1,14 +1,14 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import {
   type MonthData,
   loadMonth,
   saveMonth,
   resetMonth,
-  exportAllData,
   importData,
   getMonthName,
   calcTotals,
+  getDefaultData,
   loadSalary,
   saveSalary,
 } from "@/lib/budgetData";
@@ -17,21 +17,36 @@ import SummaryCards from "@/components/SummaryCards";
 import BudgetCharts from "@/components/BudgetCharts";
 import SavingsGoals from "@/components/SavingsGoals";
 import SalarySection from "@/components/SalarySection";
-import { ChevronLeft, ChevronRight, RotateCcw, Download, Upload } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { ChevronLeft, ChevronRight, RotateCcw, Download, Upload, LogOut } from "lucide-react";
 import * as XLSX from "xlsx";
 
 const Index = () => {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
-  const [data, setData] = useState<MonthData>(() => loadMonth(year, month));
-  const [salary, setSalary] = useState(() => loadSalary(year, month));
+  const [data, setData] = useState<MonthData>(getDefaultData());
+  const [salary, setSalary] = useState(0);
+  const [loading, setLoading] = useState(true);
   const fileRef = useRef<HTMLInputElement>(null);
+  const { user, signOut } = useAuth();
+
+  const fetchData = useCallback(async (y: number, m: number) => {
+    setLoading(true);
+    const [monthData, sal] = await Promise.all([loadMonth(y, m), loadSalary(y, m)]);
+    setData(monthData);
+    setSalary(sal);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchData(year, month);
+  }, [year, month, fetchData]);
 
   const persist = useCallback(
-    (newData: MonthData) => {
+    async (newData: MonthData) => {
       setData(newData);
-      saveMonth(year, month, newData);
+      await saveMonth(year, month, newData);
     },
     [year, month]
   );
@@ -43,13 +58,11 @@ const Index = () => {
     if (m > 11) { m = 0; y++; }
     setMonth(m);
     setYear(y);
-    setData(loadMonth(y, m));
-    setSalary(loadSalary(y, m));
   };
 
-  const handleSalaryChange = (val: number) => {
+  const handleSalaryChange = async (val: number) => {
     setSalary(val);
-    saveSalary(year, month, val);
+    await saveSalary(year, month, val);
     toast.success("Salary updated!", { duration: 1500 });
   };
 
@@ -71,11 +84,11 @@ const Index = () => {
     toast.info("Category removed", { duration: 1500 });
   };
 
-  const handleReset = () => {
-    const zeroed = resetMonth(year, month);
+  const handleReset = async () => {
+    const zeroed = await resetMonth(year, month);
     setData(zeroed);
     setSalary(0);
-    saveSalary(year, month, 0);
+    await saveSalary(year, month, 0);
     toast.info("All amounts reset to zero");
   };
 
@@ -88,7 +101,6 @@ const Index = () => {
       { name: "Investments", items: data.investments },
     ];
 
-    // Summary sheet
     const summaryRows = [
       ["BudgetBuddy - " + getMonthName(month) + " " + year],
       [],
@@ -100,7 +112,6 @@ const Index = () => {
     const summaryWs = XLSX.utils.aoa_to_sheet(summaryRows);
     XLSX.utils.book_append_sheet(wb, summaryWs, "Summary");
 
-    // Section sheets
     for (const sec of sections) {
       const rows = [["Category", "Planned (₹)", "Actual (₹)", "Difference (₹)"]];
       let totalP = 0, totalA = 0;
@@ -123,10 +134,10 @@ const Index = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
-        importData(reader.result as string);
-        setData(loadMonth(year, month));
+        await importData(reader.result as string);
+        await fetchData(year, month);
         toast.success("Data imported!");
       } catch {
         toast.error("Invalid JSON file");
@@ -144,6 +155,14 @@ const Index = () => {
     savings: "from-success/20 to-success/5 border-success/30",
     investments: "from-warning/20 to-warning/5 border-warning/30",
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground text-lg animate-pulse">Loading your budget...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8 max-w-7xl mx-auto">
@@ -173,9 +192,18 @@ const Index = () => {
           <button onClick={() => fileRef.current?.click()} className="p-2.5 rounded-xl bg-secondary hover:bg-accent/20 hover:text-accent transition-all duration-200" title="Import">
             <Upload className="w-4 h-4" />
           </button>
+          <button onClick={signOut} className="p-2.5 rounded-xl bg-secondary hover:bg-destructive/20 hover:text-destructive transition-all duration-200" title="Sign Out">
+            <LogOut className="w-4 h-4" />
+          </button>
           <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
         </div>
       </div>
+
+      {user && (
+        <div className="text-sm text-muted-foreground mb-4 text-right">
+          Signed in as <span className="text-foreground font-medium">{user.email}</span>
+        </div>
+      )}
 
       <SalarySection salary={salary} totalSpent={totals.totalActual} onSalaryChange={handleSalaryChange} />
       <SummaryCards totals={totals} />
