@@ -31,7 +31,21 @@ const Index = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user, signOut } = useAuth();
 
+  const yearRef = useRef(year);
+  const monthRef = useRef(month);
+  const pendingSave = useRef<Promise<void> | null>(null);
+
+  useEffect(() => {
+    yearRef.current = year;
+    monthRef.current = month;
+  }, [year, month]);
+
   const fetchData = useCallback(async (y: number, m: number) => {
+    // Wait for any pending save to complete before loading
+    if (pendingSave.current) {
+      await pendingSave.current;
+      pendingSave.current = null;
+    }
     setLoading(true);
     const [monthData, sal] = await Promise.all([loadMonth(y, m), loadSalary(y, m)]);
     setData(monthData);
@@ -46,9 +60,16 @@ const Index = () => {
   const persist = useCallback(
     async (newData: MonthData) => {
       setData(newData);
-      await saveMonth(year, month, newData);
+      const y = yearRef.current;
+      const m = monthRef.current;
+      const savePromise = saveMonth(y, m, newData).catch((err) => {
+        console.error("Failed to save budget data:", err);
+        toast.error("Failed to save data");
+      });
+      pendingSave.current = savePromise;
+      await savePromise;
     },
-    [year, month]
+    []
   );
 
   const navigate = (dir: -1 | 1) => {
