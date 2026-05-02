@@ -18,7 +18,7 @@ import BudgetCharts from "@/components/BudgetCharts";
 import SavingsGoals from "@/components/SavingsGoals";
 import SalarySection from "@/components/SalarySection";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronLeft, ChevronRight, RotateCcw, Download, Upload, LogOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw, Download, Upload, LogOut, Loader2, Check } from "lucide-react";
 import * as XLSX from "xlsx";
 
 const Index = () => {
@@ -28,6 +28,8 @@ const Index = () => {
   const [data, setData] = useState<MonthData>(getDefaultData());
   const [salary, setSalary] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { user, signOut } = useAuth();
 
@@ -62,10 +64,18 @@ const Index = () => {
       setData(newData);
       const y = yearRef.current;
       const m = monthRef.current;
-      const savePromise = saveMonth(y, m, newData).catch((err) => {
-        console.error("Failed to save budget data:", err);
-        toast.error("Failed to save data");
-      });
+      setSaveStatus("saving");
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+      const savePromise = saveMonth(y, m, newData)
+        .then(() => {
+          setSaveStatus("saved");
+          savedTimerRef.current = setTimeout(() => setSaveStatus("idle"), 1500);
+        })
+        .catch((err) => {
+          console.error("Failed to save budget data:", err);
+          toast.error("Failed to save data");
+          setSaveStatus("idle");
+        });
       pendingSave.current = savePromise;
       await savePromise;
     },
@@ -83,8 +93,17 @@ const Index = () => {
 
   const handleSalaryChange = async (val: number) => {
     setSalary(val);
-    await saveSalary(year, month, val);
-    toast.success("Salary updated!", { duration: 1500 });
+    setSaveStatus("saving");
+    if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
+    try {
+      await saveSalary(year, month, val);
+      setSaveStatus("saved");
+      savedTimerRef.current = setTimeout(() => setSaveStatus("idle"), 1500);
+      toast.success("Salary updated!", { duration: 1500 });
+    } catch {
+      setSaveStatus("idle");
+      toast.error("Failed to save salary");
+    }
   };
 
   const updateSection = (section: keyof MonthData, idx: number, field: "planned" | "actual", value: number) => {
@@ -220,11 +239,27 @@ const Index = () => {
         </div>
       </div>
 
-      {user && (
-        <div className="text-sm text-muted-foreground mb-4 text-right">
-          Signed in as <span className="text-foreground font-medium">{user.email}</span>
+      <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
+        <div className="h-6 flex items-center">
+          {saveStatus === "saving" && (
+            <div className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary animate-fade-in">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              Saving...
+            </div>
+          )}
+          {saveStatus === "saved" && (
+            <div className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-success/10 text-success animate-fade-in">
+              <Check className="w-3.5 h-3.5" />
+              Saved
+            </div>
+          )}
         </div>
-      )}
+        {user && (
+          <div className="text-sm text-muted-foreground ml-auto">
+            Signed in as <span className="text-foreground font-medium">{user.email}</span>
+          </div>
+        )}
+      </div>
 
       <SalarySection salary={salary} totalSpent={totals.totalActual} onSalaryChange={handleSalaryChange} />
       <SummaryCards totals={totals} />
