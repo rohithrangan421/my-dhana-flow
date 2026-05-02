@@ -268,7 +268,7 @@ const Index = () => {
       </div>
 
       <SalarySection salary={salary} totalSpent={totals.totalActual} onSalaryChange={handleSalaryChange} />
-      <SummaryCards totals={totals} />
+      <SummaryCards totals={totals} totalBudget={data.totalBudget} onTotalBudgetChange={handleTotalBudgetChange} />
       <BudgetCharts data={data} totals={totals} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
