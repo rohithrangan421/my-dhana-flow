@@ -16,6 +16,7 @@ export interface MonthData {
   expenses: BudgetItem[];
   savings: BudgetItem[];
   investments: BudgetItem[];
+  totalBudget?: number;
 }
 
 export const DEFAULT_BILLS: BudgetItem[] = [
