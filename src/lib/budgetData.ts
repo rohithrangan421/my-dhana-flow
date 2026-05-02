@@ -16,6 +16,7 @@ export interface MonthData {
   expenses: BudgetItem[];
   savings: BudgetItem[];
   investments: BudgetItem[];
+  totalBudget?: number;
 }
 
 export const DEFAULT_BILLS: BudgetItem[] = [
@@ -142,8 +143,9 @@ export function getMonthName(month: number): string {
 
 export function calcTotals(data: MonthData) {
   const all = [...data.bills, ...data.expenses, ...data.savings, ...data.investments];
-  const totalPlanned = all.reduce((s, i) => s + i.planned, 0);
+  const plannedSum = all.reduce((s, i) => s + i.planned, 0);
   const totalActual = all.reduce((s, i) => s + i.actual, 0);
+  const totalPlanned = data.totalBudget && data.totalBudget > 0 ? data.totalBudget : plannedSum;
   return { totalPlanned, totalActual, remaining: totalPlanned - totalActual };
 }
 
