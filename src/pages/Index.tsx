@@ -106,22 +106,28 @@ const Index = () => {
     }
   };
 
-  const updateSection = (section: keyof MonthData, idx: number, field: "planned" | "actual", value: number) => {
+  type SectionKey = "bills" | "expenses" | "savings" | "investments";
+
+  const updateSection = (section: SectionKey, idx: number, field: "planned" | "actual", value: number) => {
     const newData = { ...data, [section]: data[section].map((item, i) => (i === idx ? { ...item, [field]: value } : item)) };
     persist(newData);
     toast.success("Updated!", { duration: 1500 });
   };
 
-  const addItem = (section: keyof MonthData, category: string) => {
+  const addItem = (section: SectionKey, category: string) => {
     const newData = { ...data, [section]: [...data[section], { category, planned: 0, actual: 0 }] };
     persist(newData);
     toast.success(`Added "${category}"`, { duration: 1500 });
   };
 
-  const removeItem = (section: keyof MonthData, idx: number) => {
+  const removeItem = (section: SectionKey, idx: number) => {
     const newData = { ...data, [section]: data[section].filter((_, i) => i !== idx) };
     persist(newData);
     toast.info("Category removed", { duration: 1500 });
+  };
+
+  const handleTotalBudgetChange = (val: number) => {
+    persist({ ...data, totalBudget: val });
   };
 
   const handleReset = async () => {
