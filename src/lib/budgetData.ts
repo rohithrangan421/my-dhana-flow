@@ -20,35 +20,35 @@ export interface MonthData {
 }
 
 export const DEFAULT_BILLS: BudgetItem[] = [
-  { category: "Rent/EMI", planned: 15000, actual: 0 },
-  { category: "Electricity", planned: 2000, actual: 0 },
-  { category: "Internet", planned: 1000, actual: 0 },
-  { category: "Mobile", planned: 500, actual: 0 },
-  { category: "Insurance", planned: 3000, actual: 0 },
-  { category: "Vehicle EMI", planned: 8000, actual: 0 },
+  { category: "Rent/EMI", planned: 0, actual: 0 },
+  { category: "Electricity", planned: 0, actual: 0 },
+  { category: "Internet", planned: 0, actual: 0 },
+  { category: "Mobile", planned: 0, actual: 0 },
+  { category: "Insurance", planned: 0, actual: 0 },
+  { category: "Vehicle EMI", planned: 0, actual: 0 },
 ];
 
 export const DEFAULT_EXPENSES: BudgetItem[] = [
-  { category: "Groceries", planned: 5000, actual: 0 },
-  { category: "Zomato/Dining", planned: 3000, actual: 0 },
-  { category: "Petrol", planned: 3000, actual: 0 },
-  { category: "Shopping", planned: 2000, actual: 0 },
-  { category: "OTT Subscriptions", planned: 1000, actual: 0 },
-  { category: "Gym", planned: 1500, actual: 0 },
-  { category: "Travel", planned: 2000, actual: 0 },
+  { category: "Groceries", planned: 0, actual: 0 },
+  { category: "Zomato/Dining", planned: 0, actual: 0 },
+  { category: "Petrol", planned: 0, actual: 0 },
+  { category: "Shopping", planned: 0, actual: 0 },
+  { category: "OTT Subscriptions", planned: 0, actual: 0 },
+  { category: "Gym", planned: 0, actual: 0 },
+  { category: "Travel", planned: 0, actual: 0 },
 ];
 
 export const DEFAULT_SAVINGS: BudgetItem[] = [
-  { category: "Emergency Fund", planned: 5000, actual: 0 },
-  { category: "Travel Fund", planned: 3000, actual: 0 },
+  { category: "Emergency Fund", planned: 0, actual: 0 },
+  { category: "Travel Fund", planned: 0, actual: 0 },
 ];
 
 export const DEFAULT_INVESTMENTS: BudgetItem[] = [
-  { category: "SIP", planned: 5000, actual: 0 },
-  { category: "FD", planned: 3000, actual: 0 },
-  { category: "PPF/NPS", planned: 2000, actual: 0 },
-  { category: "Stocks", planned: 3000, actual: 0 },
-  { category: "Gold/SGB", planned: 2000, actual: 0 },
+  { category: "SIP", planned: 0, actual: 0 },
+  { category: "FD", planned: 0, actual: 0 },
+  { category: "PPF/NPS", planned: 0, actual: 0 },
+  { category: "Stocks", planned: 0, actual: 0 },
+  { category: "Gold/SGB", planned: 0, actual: 0 },
 ];
 
 export function getDefaultData(): MonthData {
